@@ -5,6 +5,20 @@ name="Discord"
 debname="discord.deb"
 tmpdir=$(mktemp -d /tmp/discord-update.XXXXXX)
 
+cleanup() {
+  echo "Cleaning up..."
+  rm -r $tmpdir
+}
+
+trap_ctrlc() {
+  echo "Aborted"
+  cleanup
+  exit
+}
+
+# Handle ctrl-c 
+trap trap_ctrlc INT
+
 # getting current discord version
 installed_version=$(apt-cache show discord | sed -nE 's/^Version: (.*)$/\1/p')
 last_version=$(curl --head --silent "$url" | sed -nE "s/^location: .*\/linux\/(.*)\/discord.*$/\1/p")
@@ -34,8 +48,7 @@ sudo dpkg -i $debname
 
 # removing the temp directory
 echo
-echo "Cleaning up..."
-rm -r $tmpdir
+cleanup
 
-echo Finished;
-echo You can now launch Discord;
+echo "Finished"
+echo "You can now launch Discord"
